@@ -1,6 +1,5 @@
 # Media Import for Jellyfin
 
-[![Build](https://github.com/daniel1v/jellyfin-plugin-media-import/actions/workflows/build.yaml/badge.svg)](https://github.com/daniel1v/jellyfin-plugin-media-import/actions/workflows/build.yaml)
 [![Tests](https://github.com/daniel1v/jellyfin-plugin-media-import/actions/workflows/test.yaml/badge.svg)](https://github.com/daniel1v/jellyfin-plugin-media-import/actions/workflows/test.yaml)
 
 An interactive Jellyfin plugin for reviewing, identifying, naming, and importing films and series into a Jellyfin library.
