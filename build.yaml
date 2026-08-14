@@ -1,9 +1,9 @@
 ---
 name: "Media Import"
 guid: "af3a51c6-5a19-420d-8dcd-1cbdda17f864"
-version: "0.1.0.0"
-targetAbi: "10.11.11.0"
-framework: "net9.0"
+version: "0.2.0.0"
+targetAbi: "12.0.0.0"
+framework: "net10.0"
 overview: "Interactive import of films and series into Jellyfin libraries."
 description: >
   Media Import guides administrators through identifying, naming,
@@ -13,6 +13,5 @@ owner: "daniel1v"
 artifacts:
 - "Jellyfin.Plugin.MediaImport.dll"
 changelog: >
-  Initial beta with interactive movie and episode identification, reviewable
-  import previews, Jellyfin-standard NFO sidecars, safe non-overwriting file
-  moves, progressive media details, and sortable inbox columns.
+  Unreleased Jellyfin 12 port targeting RC5 and .NET 10. This build is intended
+  for isolated compatibility testing until Jellyfin 12 reaches a stable release.

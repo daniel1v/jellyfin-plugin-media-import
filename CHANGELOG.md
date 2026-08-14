@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.0.0 — Unreleased
+
+- Port Media Import to Jellyfin 12.0 and .NET 10.
+- Target Jellyfin 12.0 RC5 while the server release remains in its release-candidate phase.
+
 ## 0.1.0.0 — Initial beta — 2026-08-14
 
 - Added an administrator-only import queue for `.mkv`, `.mp4`, and `.m4v` files.

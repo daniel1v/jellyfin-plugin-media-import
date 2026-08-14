@@ -18,9 +18,18 @@ An interactive Jellyfin plugin for reviewing, identifying, naming, and importing
 
 ## Compatibility
 
-The initial beta targets **Jellyfin Server 10.11.11** and its plugin ABI `10.11.11.0`. Jellyfin plugin APIs are version-sensitive; other server versions are not supported unless a matching Media Import build is published.
+The `jellyfin-12` development branch targets **Jellyfin Server 12.0 RC5** and its plugin ABI `12.0.0.0`. It is an unreleased porting branch and must only be used with an isolated Jellyfin 12 test instance while Jellyfin 12 remains in its release-candidate phase.
 
-The beta has been integration-tested on Windows. The implementation is platform-neutral, but Linux and container deployments should be considered beta test targets until they have received an explicit smoke test.
+The published `0.1.0.0` beta on `main` continues to target Jellyfin Server 10.11.11. Jellyfin plugin APIs are version-sensitive; builds must not be moved between the 10.11 and 12.0 server lines.
+
+The published 10.11 beta has been integration-tested on Windows. The Jellyfin 12 branch builds and passes its automated tests, but remains unsupported until it has also passed an isolated Jellyfin 12 runtime test. The implementation is platform-neutral, but Linux and container deployments should be considered beta test targets until they have received an explicit smoke test.
+
+### Version branches
+
+- `main` remains the published Jellyfin 10.11 line until Jellyfin 12 is stable.
+- `jellyfin-12` tracks the current Jellyfin 12 release candidate for porting and compatibility tests.
+- The plugin GUID remains unchanged so settings can survive a compatible upgrade.
+- A Jellyfin 12 package will only be added to `manifest.json` after a runtime test against the matching server release. The existing 10.11 package remains in the catalog for compatible servers.
 
 ## Installation
 
@@ -45,9 +54,10 @@ Jellyfin must be able to read the handoff directory and create directories, NFO 
 ## Development baseline
 
 - Plugin namespace: `Jellyfin.Plugin.MediaImport`
-- .NET SDK: 9.0.317 (or a newer 9.0 feature band)
-- Jellyfin target ABI: 10.11.11.0
-- Test server: Jellyfin 10.11.11 with a separate data directory and test-only libraries
+- .NET SDK: 10.0.400 (or a newer 10.0 feature band)
+- Jellyfin packages: 12.0.0-rc5
+- Jellyfin target ABI: 12.0.0.0
+- Test server: Jellyfin 12.0 RC5 with a separate data directory and test-only libraries
 
 The `Jellyfin.Controller` and `Jellyfin.Model` package versions are centralised in `Directory.Build.props`. When changing the Jellyfin version, update both package references and `build.yaml` together, then test against that exact server version.
 
@@ -90,7 +100,7 @@ The published DLL and its required dependencies are placed in `artifacts/local`.
 
 Never point the deployment script at a production Jellyfin data directory.
 
-1. Create and start a separate Jellyfin 10.11.11 test instance with dedicated configuration, cache, database, and test libraries.
+1. Create and start a separate Jellyfin 12.0 RC5 test instance with dedicated configuration, cache, database, and test libraries.
 2. Set the `JELLYFIN_TEST_DATA_DIR` environment variable to that test instance's data directory.
 3. Create an empty `.media-import-test` file in that same directory. It is an explicit safety marker required by the deployment script.
 4. Run the VS Code task **Media Import: deploy to test Jellyfin**, or:

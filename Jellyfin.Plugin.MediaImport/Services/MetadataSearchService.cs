@@ -119,13 +119,19 @@ public sealed class MetadataSearchService : IMetadataSearchService
             .ToArray();
 
     private static MetadataSearchResult? ToMetadataSearchResult(RemoteSearchResult result)
-        => result.ProviderIds.TryGetValue(MetadataSearchRequestFactory.TmdbProviderIdName, out var tmdbId)
+        => !string.IsNullOrWhiteSpace(result.Name)
+            && result.ProviderIds.TryGetValue(MetadataSearchRequestFactory.TmdbProviderIdName, out var tmdbId)
             && !string.IsNullOrWhiteSpace(tmdbId)
             ? new MetadataSearchResult(result.Name, result.ProductionYear ?? result.PremiereDate?.Year, tmdbId)
             : null;
 
-    private static EpisodeResolution ToEpisodeResolution(RemoteSearchResult result)
+    private static EpisodeResolution? ToEpisodeResolution(RemoteSearchResult result)
     {
+        if (string.IsNullOrWhiteSpace(result.Name))
+        {
+            return null;
+        }
+
         result.ProviderIds.TryGetValue(MetadataSearchRequestFactory.TmdbProviderIdName, out var tmdbId);
         return new EpisodeResolution(
             result.Name,
