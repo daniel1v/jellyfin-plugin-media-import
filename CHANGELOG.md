@@ -1,9 +1,10 @@
 # Changelog
 
-## 0.2.0.0 — Unreleased
+## 0.2.0.0 — Jellyfin 12 beta — 2026-08-14
 
 - Port Media Import to Jellyfin 12.0 and .NET 10.
 - Target Jellyfin 12.0 RC5 while the server release remains in its release-candidate phase.
+- Retain the complete interactive import workflow from the Jellyfin 10.11 beta.
 
 ## 0.1.0.0 — Initial beta — 2026-08-14
 

@@ -13,5 +13,5 @@ owner: "daniel1v"
 artifacts:
 - "Jellyfin.Plugin.MediaImport.dll"
 changelog: >
-  Unreleased Jellyfin 12 port targeting RC5 and .NET 10. This build is intended
-  for isolated compatibility testing until Jellyfin 12 reaches a stable release.
+  Jellyfin 12 beta targeting RC5 and .NET 10. Includes the complete interactive
+  import workflow from the Jellyfin 10.11 beta.
