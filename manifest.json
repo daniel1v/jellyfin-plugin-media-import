@@ -1,0 +1,20 @@
+[
+  {
+    "category": "General",
+    "guid": "af3a51c6-5a19-420d-8dcd-1cbdda17f864",
+    "name": "Media Import",
+    "description": "Media Import guides administrators through identifying, naming, reviewing, and importing video files into Jellyfin libraries.",
+    "owner": "daniel1v",
+    "overview": "Interactive import of films and series into Jellyfin libraries.",
+    "versions": [
+      {
+        "checksum": "62b8d5c3d535ac1794c5494061e5fc24",
+        "changelog": "Initial beta with interactive movie and episode identification, reviewable import previews, Jellyfin-standard NFO sidecars, safe non-overwriting file moves, progressive media details, and sortable inbox columns.",
+        "targetAbi": "10.11.11.0",
+        "sourceUrl": "https://github.com/daniel1v/jellyfin-plugin-media-import/releases/download/v0.1.0.0/jellyfin-plugin-media-import_v0.1.0.0.zip",
+        "timestamp": "2026-08-14 15:27:15",
+        "version": "0.1.0.0"
+      }
+    ]
+  }
+]

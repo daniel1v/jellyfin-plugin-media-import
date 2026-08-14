@@ -24,10 +24,11 @@ The beta has been integration-tested on Windows. The implementation is platform-
 
 ## Installation
 
-1. Download the ZIP for the latest beta from the GitHub [Releases](https://github.com/daniel1v/jellyfin-plugin-media-import/releases) page.
-2. Stop Jellyfin.
-3. Extract the release into its own directory below Jellyfin's plugin directory, for example `plugins/Media Import`.
-4. Start Jellyfin and confirm that **Media Import** appears in the administrator dashboard.
+1. Open **Dashboard → Plugins → Repositories** in Jellyfin.
+2. Add a repository named **Media Import** with this URL:
+   `https://raw.githubusercontent.com/daniel1v/jellyfin-plugin-media-import/main/manifest.json`
+3. Open the Jellyfin plugin catalog and install **Media Import** from the **General** category.
+4. Restart Jellyfin when prompted.
 5. Configure the handoff directory and the movie and series destination directories.
 
 Jellyfin must be able to read the handoff directory and create directories, NFO files, and media files below both destination roots. The built-in `TheMovieDb` metadata provider must be enabled. No separate TMDb key is required.
