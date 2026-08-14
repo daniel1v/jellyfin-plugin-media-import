@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="utf-8">
+    <title>Media Import</title>
+</head>
+<body>
+    <div id="MediaImportConfigPage" data-role="page" class="page type-interior pluginConfigurationPage" data-require="emby-input,emby-button,emby-checkbox">
+        <style>
+            #MediaImportConfigPage .mi-toolbar,
+            #MediaImportConfigPage .mi-actions,
+            #MediaImportConfigPage .mi-dialog-actions {
+                display: flex;
+                align-items: center;
+                gap: .75em;
+                flex-wrap: wrap;
+            }
+
+            #MediaImportConfigPage .mi-toolbar {
+                justify-content: space-between;
+                margin: 1.5em 0 1em;
+            }
+
+            #MediaImportConfigPage .mi-tabs {
+                display: flex;
+                margin-bottom: 1.5em;
+            }
+
+            #MediaImportConfigPage .mi-tab[aria-selected="true"]::after {
+                background: currentColor;
+                bottom: 0;
+                content: "";
+                height: .2em;
+                left: 1.5em;
+                position: absolute;
+                right: 1.5em;
+            }
+
+            #MediaImportConfigPage .mi-table-wrap {
+                overflow-x: auto;
+                border: 1px solid rgba(255, 255, 255, .14);
+                border-radius: .25em;
+            }
+
+            #MediaImportConfigPage .mi-table {
+                width: 100%;
+                border-collapse: collapse;
+                min-width: 72em;
+            }
+
+            #MediaImportConfigPage .mi-table th,
+            #MediaImportConfigPage .mi-table td {
+                text-align: left;
+                vertical-align: middle;
+                padding: .8em;
+                border-bottom: 1px solid rgba(255, 255, 255, .1);
+            }
+
+            #MediaImportConfigPage .mi-table th:first-child,
+            #MediaImportConfigPage .mi-table td:first-child {
+                width: 2.5em;
+                text-align: center;
+            }
+
+            #MediaImportConfigPage .mi-table td:last-child {
+                word-break: break-word;
+            }
+
+            #MediaImportConfigPage .mi-technical-column {
+                white-space: nowrap;
+            }
+
+            #MediaImportConfigPage .mi-sort {
+                align-items: center;
+                appearance: none;
+                background: transparent;
+                border: 0;
+                color: inherit;
+                cursor: pointer;
+                display: inline-flex;
+                font: inherit;
+                gap: .35em;
+                padding: 0;
+            }
+
+            #MediaImportConfigPage .mi-sort:hover,
+            #MediaImportConfigPage .mi-sort:focus-visible {
+                opacity: .8;
+            }
+
+            #MediaImportConfigPage .mi-sort-indicator {
+                display: inline-block;
+                min-width: .8em;
+            }
+
+            #MediaImportConfigPage .mi-type-filter {
+                display: flex;
+                gap: .4em;
+                margin: 1.25em 0 .75em;
+            }
+
+            #MediaImportConfigPage .mi-type-filter button[aria-pressed="true"] {
+                border-bottom: .2em solid #00a4dc;
+            }
+
+            #MediaImportConfigPage .mi-result-heading {
+                margin: 1em 0 .25em;
+            }
+
+            #MediaImportConfigPage .mi-secondary {
+                opacity: .7;
+                font-size: .88em;
+                margin-top: .25em;
+                word-break: break-word;
+            }
+
+            #MediaImportConfigPage .mi-status-error {
+                color: #ff8f8f;
+            }
+
+            #MediaImportConfigPage .mi-status-ok {
+                color: #7ddf91;
+            }
+
+            #MediaImportConfigPage .mi-empty,
+            #MediaImportConfigPage .mi-message {
+                padding: 1.25em;
+                border-radius: .25em;
+                background: rgba(255, 255, 255, .06);
+            }
+
+            #MediaImportConfigPage .mi-message {
+                margin: 1em 0;
+            }
+
+            #MediaImportConfigPage .mi-dialog {
+                width: min(46em, calc(100vw - 2em));
+                max-height: calc(100vh - 3em);
+                overflow: auto;
+                padding: 1.5em;
+                color: inherit;
+                background: #202020;
+                border: 1px solid rgba(255, 255, 255, .2);
+                border-radius: .4em;
+            }
+
+            #MediaImportConfigPage .mi-dialog::backdrop {
+                background: rgba(0, 0, 0, .72);
+            }
+
+            #MediaImportConfigPage .mi-search-line {
+                display: grid;
+                grid-template-columns: 1fr auto;
+                gap: .75em;
+                align-items: end;
+            }
+
+            #MediaImportConfigPage .mi-result-list {
+                display: grid;
+                gap: .5em;
+                margin: 1em 0;
+            }
+
+            #MediaImportConfigPage .mi-result {
+                width: 100%;
+                text-align: left;
+                padding: .8em 1em;
+            }
+
+            #MediaImportConfigPage .mi-episode-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 1em;
+            }
+
+            #MediaImportConfigPage [hidden] {
+                display: none !important;
+            }
+        </style>
+        <div data-role="content">
+            <div class="content-primary">
+                <h2>Media Import</h2>
+                <p>Fertige Videodateien prüfen, zuordnen und kontrolliert in die Jellyfin-Mediathek übernehmen.</p>
+
+                <div class="mi-tabs" role="tablist" aria-label="Media Import Bereiche">
+                    <button id="MediaImportQueueTab" type="button" is="emby-button" class="emby-tab-button emby-tab-button-active mi-tab" role="tab" aria-selected="true">Import</button>
+                    <button id="MediaImportSettingsTab" type="button" is="emby-button" class="emby-tab-button mi-tab" role="tab" aria-selected="false">Einstellungen</button>
+                </div>
+
+                <section id="MediaImportQueuePanel" role="tabpanel" aria-labelledby="MediaImportQueueTab">
+                    <div id="MediaImportNotice" class="mi-message" hidden></div>
+                    <div class="mi-toolbar">
+                        <div>
+                            <strong id="MediaImportFileCount">0 Dateien</strong>
+                            <div id="MediaImportSelectionSummary" class="mi-secondary">Keine Datei ausgewählt</div>
+                        </div>
+                        <div class="mi-actions">
+                            <button id="MediaImportRefresh" type="button" is="emby-button" class="raised emby-button">Aktualisieren</button>
+                            <button id="MediaImportSelected" type="button" is="emby-button" class="raised button-submit emby-button" disabled>Ausgewählte importieren</button>
+                        </div>
+                    </div>
+
+                    <div id="MediaImportEmpty" class="mi-empty" hidden>Im Übergabeordner warten derzeit keine unterstützten Videodateien.</div>
+                    <div id="MediaImportTableWrap" class="mi-table-wrap" hidden>
+                        <table class="mi-table">
+                            <thead>
+                                <tr>
+                                    <th><input id="MediaImportSelectAll" type="checkbox" aria-label="Alle Dateien auswählen" /></th>
+                                    <th aria-sort="ascending"><button type="button" class="mi-sort" data-sort-key="fileName">Datei <span class="mi-sort-indicator" aria-hidden="true">▲</span></button></th>
+                                    <th class="mi-technical-column" aria-sort="none"><button type="button" class="mi-sort" data-sort-key="sizeBytes">Größe <span class="mi-sort-indicator" aria-hidden="true"></span></button></th>
+                                    <th class="mi-technical-column" aria-sort="none"><button type="button" class="mi-sort" data-sort-key="runTimeTicks">Dauer <span class="mi-sort-indicator" aria-hidden="true"></span></button></th>
+                                    <th class="mi-technical-column" aria-sort="none"><button type="button" class="mi-sort" data-sort-key="resolution">Auflösung <span class="mi-sort-indicator" aria-hidden="true"></span></button></th>
+                                    <th>TMDb-Zuordnung</th>
+                                    <th>Ziel / Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="MediaImportRows"></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section id="MediaImportSettingsPanel" role="tabpanel" aria-labelledby="MediaImportSettingsTab" hidden>
+                    <form id="MediaImportConfigForm">
+                        <div class="inputContainer">
+                            <label class="inputLabel inputLabelUnfocused" for="InboxPath">Übergabeordner</label>
+                            <input id="InboxPath" name="InboxPath" type="text" is="emby-input" />
+                            <div class="fieldDescription">Dateien in diesem Ordner werden nur vorgeschlagen und niemals automatisch importiert.</div>
+                        </div>
+                        <div class="inputContainer">
+                            <label class="inputLabel inputLabelUnfocused" for="MoviesLibraryPath">Zielordner für Filme</label>
+                            <input id="MoviesLibraryPath" name="MoviesLibraryPath" type="text" is="emby-input" />
+                        </div>
+                        <div class="inputContainer">
+                            <label class="inputLabel inputLabelUnfocused" for="SeriesLibraryPath">Zielordner für Serien</label>
+                            <input id="SeriesLibraryPath" name="SeriesLibraryPath" type="text" is="emby-input" />
+                        </div>
+                        <div class="checkboxContainer checkboxContainer-withDescription">
+                            <label class="emby-checkbox-label">
+                                <input id="RequireExplicitConfirmation" name="RequireExplicitConfirmation" type="checkbox" is="emby-checkbox" />
+                                <span>Import vor dem Verschieben noch einmal bestätigen</span>
+                            </label>
+                        </div>
+                        <div>
+                            <button is="emby-button" type="submit" class="raised button-submit block emby-button">
+                                <span>Speichern</span>
+                            </button>
+                        </div>
+                    </form>
+                </section>
+
+                <dialog id="MediaImportSearchDialog" class="mi-dialog" aria-labelledby="MediaImportDialogTitle">
+                    <h2 id="MediaImportDialogTitle">TMDb-Eintrag wählen</h2>
+                    <div id="MediaImportDialogFile" class="mi-secondary"></div>
+                    <div class="mi-type-filter" role="group" aria-label="Medientyp durchsuchen">
+                        <button id="MediaImportSearchAll" type="button" is="emby-button" class="raised emby-button" aria-pressed="true">Alle</button>
+                        <button id="MediaImportSearchMovies" type="button" is="emby-button" class="raised emby-button" aria-pressed="false">Filme</button>
+                        <button id="MediaImportSearchSeries" type="button" is="emby-button" class="raised emby-button" aria-pressed="false">Serien</button>
+                    </div>
+                    <div class="mi-search-line">
+                        <div class="inputContainer">
+                            <label class="inputLabel inputLabelUnfocused" for="MediaImportSearchQuery">Suche</label>
+                            <input id="MediaImportSearchQuery" type="search" is="emby-input" autocomplete="off" />
+                        </div>
+                        <button id="MediaImportSearchButton" type="button" is="emby-button" class="raised button-submit emby-button">Suchen</button>
+                    </div>
+                    <div id="MediaImportSearchStatus" class="mi-message" hidden></div>
+                    <div id="MediaImportSearchResults" class="mi-result-list"></div>
+
+                    <section id="MediaImportEpisodePanel" hidden>
+                        <h3>Episode festlegen</h3>
+                        <div id="MediaImportSelectedSeries" class="mi-message"></div>
+                        <div class="mi-episode-grid">
+                            <div class="inputContainer">
+                                <label class="inputLabel inputLabelUnfocused" for="MediaImportSeason">Staffel</label>
+                                <input id="MediaImportSeason" type="number" min="0" step="1" is="emby-input" />
+                            </div>
+                            <div class="inputContainer">
+                                <label class="inputLabel inputLabelUnfocused" for="MediaImportEpisode">Episode</label>
+                                <input id="MediaImportEpisode" type="number" min="1" step="1" is="emby-input" />
+                            </div>
+                        </div>
+                        <button id="MediaImportResolveEpisode" type="button" is="emby-button" class="raised button-submit emby-button">Episode prüfen und übernehmen</button>
+                    </section>
+
+                    <div class="mi-dialog-actions" style="margin-top: 1.25em; justify-content: flex-end;">
+                        <button id="MediaImportCloseDialog" type="button" is="emby-button" class="raised emby-button">Abbrechen</button>
+                    </div>
+                </dialog>
+            </div>
+        </div>
+        <script type="text/javascript">
+            (function () {
+                'use strict';
+
+                var pluginUniqueId = 'af3a51c6-5a19-420d-8dcd-1cbdda17f864';
+                var page = document.querySelector('#MediaImportConfigPage');
+                var rows = [];
+                var activeRow = null;
+                var selectedSeries = null;
+                var searchMode = 'all';
+                var currentConfig = null;
+                var mediaInfoGeneration = 0;
+                var sortState = { key: 'fileName', direction: 'asc' };
+                var fileNameCollator = new Intl.Collator('de-DE', { numeric: true, sensitivity: 'base' });
+
+                function field(name) {
+                    return page.querySelector('#' + name);
+                }
+
+                function property(value, camelName, pascalName) {
+                    if (value && Object.prototype.hasOwnProperty.call(value, camelName)) {
+                        return value[camelName];
+                    }
+
+                    return value ? value[pascalName] : undefined;
+                }
+
+                function apiRequest(type, path, data, query) {
+                    var options = {
+                        type: type,
+                        url: ApiClient.getUrl(path, query || {}),
+                        dataType: 'json'
+                    };
+
+                    if (data !== undefined) {
+                        options.data = JSON.stringify(data);
+                        options.contentType = 'application/json';
+                    }
+
+                    return ApiClient.ajax(options);
+                }
+
+                function errorMessage(error) {
+                    var response = error && (error.responseJSON || error.response);
+                    if (response) {
+                        return response.detail || response.title || response.Message || response.message || 'Die Anfrage konnte nicht ausgeführt werden.';
+                    }
+
+                    return error && error.message ? error.message : 'Die Anfrage konnte nicht ausgeführt werden.';
+                }
+
+                function setMessage(element, message, isError) {
+                    element.textContent = message || '';
+                    element.hidden = !message;
+                    element.classList.toggle('mi-status-error', Boolean(isError));
+                    element.classList.toggle('mi-status-ok', Boolean(message) && !isError);
+                }
+
+                function pluralFiles(count) {
+                    return count === 1 ? '1 Datei' : count + ' Dateien';
+                }
+
+                function fileSize(size) {
+                    if (!size) {
+                        return '0 B';
+                    }
+
+                    var units = ['B', 'KB', 'MB', 'GB', 'TB'];
+                    var index = Math.min(Math.floor(Math.log(size) / Math.log(1024)), units.length - 1);
+                    return (size / Math.pow(1024, index)).toLocaleString('de-DE', { maximumFractionDigits: index > 1 ? 1 : 0 }) + ' ' + units[index];
+                }
+
+                function duration(runTimeTicks) {
+                    if (!runTimeTicks || runTimeTicks < 0) {
+                        return null;
+                    }
+
+                    var totalSeconds = Math.floor(runTimeTicks / 10000000);
+                    var hours = Math.floor(totalSeconds / 3600);
+                    var minutes = Math.floor((totalSeconds % 3600) / 60);
+                    var seconds = totalSeconds % 60;
+                    var minuteText = String(minutes).padStart(hours ? 2 : 1, '0');
+                    var secondText = String(seconds).padStart(2, '0');
+                    return hours ? hours + ':' + minuteText + ':' + secondText : minuteText + ':' + secondText;
+                }
+
+                function runTimeTicks(row) {
+                    return row.mediaInfo ? property(row.mediaInfo, 'runTimeTicks', 'RunTimeTicks') : null;
+                }
+
+                function videoWidth(row) {
+                    return row.mediaInfo ? property(row.mediaInfo, 'width', 'Width') : null;
+                }
+
+                function videoHeight(row) {
+                    return row.mediaInfo ? property(row.mediaInfo, 'height', 'Height') : null;
+                }
+
+                function durationText(row) {
+                    if (row.mediaInfoState === 'loading') {
+                        return '\u2026';
+                    }
+
+                    return duration(runTimeTicks(row)) || '\u2014';
+                }
+
+                function resolutionText(row) {
+                    if (row.mediaInfoState === 'loading') {
+                        return '\u2026';
+                    }
+
+                    var width = videoWidth(row);
+                    var height = videoHeight(row);
+                    return width && height ? width + ' \u00D7 ' + height : '\u2014';
+                }
+
+                function mediaInfoTitle(row) {
+                    if (row.mediaInfoState === 'loading') {
+                        return 'Medieninformationen werden geladen';
+                    }
+
+                    return row.mediaInfoState === 'unavailable'
+                        ? 'Medieninformationen nicht verf\u00FCgbar'
+                        : '';
+                }
+
+                function updateMediaInfoDisplay(row) {
+                    var rowElement = field('MediaImportRows').querySelector('[data-mi-row-id="' + row.id + '"]');
+                    if (rowElement) {
+                        var durationElement = rowElement.querySelector('.mi-duration');
+                        var resolutionElement = rowElement.querySelector('.mi-resolution');
+                        durationElement.textContent = durationText(row);
+                        resolutionElement.textContent = resolutionText(row);
+                        durationElement.title = mediaInfoTitle(row);
+                        resolutionElement.title = mediaInfoTitle(row);
+                    }
+                }
+
+                function loadMediaInfo(files, generation) {
+                    var nextIndex = 0;
+
+                    function worker() {
+                        if (generation !== mediaInfoGeneration || nextIndex >= files.length) {
+                            return Promise.resolve();
+                        }
+
+                        var row = files[nextIndex++];
+                        return apiRequest('GET', 'MediaImport/Files/MediaInfo', undefined, {
+                            sourceFileName: row.fileName
+                        }).then(function (mediaInfo) {
+                            if (generation === mediaInfoGeneration) {
+                                row.mediaInfo = mediaInfo;
+                                row.mediaInfoState = 'ready';
+                                updateMediaInfoDisplay(row);
+                            }
+                        }).catch(function () {
+                            if (generation === mediaInfoGeneration) {
+                                row.mediaInfoState = 'unavailable';
+                                updateMediaInfoDisplay(row);
+                            }
+                        }).then(worker);
+                    }
+
+                    return Promise.all([worker(), worker()]).then(function () {
+                        if (generation === mediaInfoGeneration
+                            && (sortState.key === 'runTimeTicks' || sortState.key === 'resolution')) {
+                            renderRows();
+                        }
+                    });
+                }
+
+                function showPanel(name) {
+                    var queueSelected = name === 'queue';
+                    field('MediaImportQueueTab').classList.toggle('emby-tab-button-active', queueSelected);
+                    field('MediaImportSettingsTab').classList.toggle('emby-tab-button-active', !queueSelected);
+                    field('MediaImportQueuePanel').hidden = !queueSelected;
+                    field('MediaImportSettingsPanel').hidden = queueSelected;
+                    field('MediaImportQueueTab').setAttribute('aria-selected', String(queueSelected));
+                    field('MediaImportSettingsTab').setAttribute('aria-selected', String(!queueSelected));
+                }
+
+                function createCell(rowElement, className) {
+                    var cell = document.createElement('td');
+                    if (className) {
+                        cell.className = className;
+                    }
+
+                    rowElement.appendChild(cell);
+                    return cell;
+                }
+
+                function sortValue(row, key) {
+                    if (key === 'fileName') {
+                        return row.fileName;
+                    }
+
+                    if (key === 'sizeBytes') {
+                        return row.sizeBytes;
+                    }
+
+                    if (key === 'runTimeTicks') {
+                        return runTimeTicks(row);
+                    }
+
+                    if (key === 'resolution') {
+                        var width = videoWidth(row);
+                        var height = videoHeight(row);
+                        return width && height ? width * height : null;
+                    }
+
+                    return null;
+                }
+
+                function compareRows(left, right) {
+                    var leftValue = sortValue(left, sortState.key);
+                    var rightValue = sortValue(right, sortState.key);
+                    var leftMissing = leftValue === null || leftValue === undefined;
+                    var rightMissing = rightValue === null || rightValue === undefined;
+                    if (leftMissing || rightMissing) {
+                        if (leftMissing !== rightMissing) {
+                            return leftMissing ? 1 : -1;
+                        }
+
+                        return left.id - right.id;
+                    }
+
+                    var comparison = typeof leftValue === 'string'
+                        ? fileNameCollator.compare(leftValue, rightValue)
+                        : leftValue - rightValue;
+                    if (comparison === 0) {
+                        return left.id - right.id;
+                    }
+
+                    return sortState.direction === 'desc' ? -comparison : comparison;
+                }
+
+                function updateSortHeaders() {
+                    page.querySelectorAll('.mi-sort').forEach(function (button) {
+                        var selected = button.getAttribute('data-sort-key') === sortState.key;
+                        var header = button.closest('th');
+                        var indicator = button.querySelector('.mi-sort-indicator');
+                        header.setAttribute('aria-sort', selected
+                            ? (sortState.direction === 'asc' ? 'ascending' : 'descending')
+                            : 'none');
+                        indicator.textContent = selected
+                            ? (sortState.direction === 'asc' ? '\u25B2' : '\u25BC')
+                            : '';
+                    });
+                }
+
+                function changeSort(key) {
+                    if (sortState.key === key) {
+                        sortState.direction = sortState.direction === 'asc' ? 'desc' : 'asc';
+                    } else {
+                        sortState = { key: key, direction: 'asc' };
+                    }
+
+                    renderRows();
+                }
+
+                function renderRows() {
+                    var body = field('MediaImportRows');
+                    body.replaceChildren();
+                    rows.sort(compareRows);
+
+                    rows.forEach(function (row) {
+                        var element = document.createElement('tr');
+                        element.setAttribute('data-mi-row-id', row.id);
+                        var selectCell = createCell(element);
+                        var checkbox = document.createElement('input');
+                        checkbox.type = 'checkbox';
+                        checkbox.checked = row.selected;
+                        checkbox.setAttribute('aria-label', row.fileName + ' auswählen');
+                        checkbox.addEventListener('change', function () {
+                            row.selected = checkbox.checked;
+                            updateActions();
+                        });
+                        selectCell.appendChild(checkbox);
+
+                        var fileCell = createCell(element);
+                        var fileName = document.createElement('div');
+                        fileName.textContent = row.fileName;
+                        fileCell.appendChild(fileName);
+
+                        var sizeCell = createCell(element, 'mi-technical-column');
+                        sizeCell.textContent = fileSize(row.sizeBytes);
+
+                        var durationCell = createCell(element, 'mi-technical-column mi-duration');
+                        durationCell.textContent = durationText(row);
+                        durationCell.title = mediaInfoTitle(row);
+
+                        var resolutionCell = createCell(element, 'mi-technical-column mi-resolution');
+                        resolutionCell.textContent = resolutionText(row);
+                        resolutionCell.title = mediaInfoTitle(row);
+
+                        var metadataCell = createCell(element);
+                        var assignButton = document.createElement('button');
+                        assignButton.type = 'button';
+                        assignButton.className = 'raised emby-button';
+                        assignButton.textContent = row.assignment ? 'Ändern' : 'Auswählen';
+                        assignButton.addEventListener('click', function () {
+                            openSearch(row);
+                        });
+                        metadataCell.appendChild(assignButton);
+                        if (row.assignment) {
+                            var assigned = document.createElement('div');
+                            assigned.className = 'mi-secondary';
+                            assigned.textContent = row.assignment.label;
+                            metadataCell.appendChild(assigned);
+                        }
+
+                        var targetCell = createCell(element);
+                        var target = document.createElement('div');
+                        if (row.plan) {
+                            target.textContent = property(row.plan, 'destinationRelativePath', 'DestinationRelativePath');
+                            target.className = property(row.plan, 'canImport', 'CanImport') ? 'mi-status-ok' : 'mi-status-error';
+                            var sidecars = property(row.plan, 'nfoSidecars', 'NfoSidecars') || [];
+                            if (sidecars.length) {
+                                var nfoElement = document.createElement('div');
+                                nfoElement.className = 'mi-secondary';
+                                nfoElement.textContent = 'NFO: ' + sidecars.map(function (sidecar) {
+                                    var relativePath = property(sidecar, 'relativePath', 'RelativePath');
+                                    var alreadyExists = property(sidecar, 'alreadyExists', 'AlreadyExists');
+                                    return relativePath + (alreadyExists ? ' (vorhanden)' : '');
+                                }).join(', ');
+                                targetCell.appendChild(nfoElement);
+                            }
+                            var conflict = property(row.plan, 'conflictMessage', 'ConflictMessage');
+                            if (conflict) {
+                                var conflictElement = document.createElement('div');
+                                conflictElement.className = 'mi-secondary mi-status-error';
+                                conflictElement.textContent = conflict;
+                                targetCell.appendChild(conflictElement);
+                            }
+                        } else if (row.error) {
+                            target.textContent = row.error;
+                            target.className = 'mi-status-error';
+                        } else {
+                            target.textContent = 'Noch nicht zugeordnet';
+                            target.className = 'mi-secondary';
+                        }
+                        targetCell.insertBefore(target, targetCell.firstChild);
+
+                        body.appendChild(element);
+                    });
+
+                    field('MediaImportFileCount').textContent = pluralFiles(rows.length) + ' warten';
+                    field('MediaImportEmpty').hidden = rows.length !== 0;
+                    field('MediaImportTableWrap').hidden = rows.length === 0;
+                    updateSortHeaders();
+                    updateActions();
+                }
+
+                function updateActions() {
+                    var selected = rows.filter(function (row) { return row.selected; });
+                    var ready = selected.filter(function (row) {
+                        return row.plan && property(row.plan, 'canImport', 'CanImport');
+                    });
+                    field('MediaImportSelectionSummary').textContent = selected.length === 0
+                        ? 'Keine Datei ausgewählt'
+                        : selected.length + ' ausgewählt, ' + ready.length + ' importbereit';
+                    field('MediaImportSelected').disabled = selected.length === 0 || ready.length !== selected.length;
+                    field('MediaImportSelectAll').checked = rows.length > 0 && selected.length === rows.length;
+                    field('MediaImportSelectAll').indeterminate = selected.length > 0 && selected.length < rows.length;
+                }
+
+                function makeRows(files) {
+                    return files.map(function (file, index) {
+                        var parsed = property(file, 'parsedFileName', 'ParsedFileName') || {};
+                        return {
+                            id: index,
+                            fileName: property(file, 'fileName', 'FileName'),
+                            sizeBytes: property(file, 'sizeBytes', 'SizeBytes'),
+                            parsed: parsed,
+                            mediaType: null,
+                            suggestedSearchMode: property(parsed, 'seasonNumber', 'SeasonNumber') !== null && property(parsed, 'seasonNumber', 'SeasonNumber') !== undefined ? 'series' : 'all',
+                            selected: false,
+                            assignment: null,
+                            plan: null,
+                            error: null,
+                            mediaInfo: null,
+                            mediaInfoState: 'loading'
+                        };
+                    });
+                }
+
+                function loadFiles() {
+                    mediaInfoGeneration += 1;
+                    var generation = mediaInfoGeneration;
+                    Dashboard.showLoadingMsg();
+                    setMessage(field('MediaImportNotice'), '', false);
+                    return apiRequest('GET', 'MediaImport/Files').then(function (files) {
+                        rows = makeRows(files || []);
+                        renderRows();
+                        loadMediaInfo(rows.slice(), generation);
+                    }).catch(function (error) {
+                        rows = [];
+                        renderRows();
+                        setMessage(field('MediaImportNotice'), errorMessage(error), true);
+                    }).then(function () {
+                        Dashboard.hideLoadingMsg();
+                    });
+                }
+
+                function loadConfiguration() {
+                    return ApiClient.getPluginConfiguration(pluginUniqueId).then(function (config) {
+                        currentConfig = config;
+                        field('InboxPath').value = config.InboxPath || '';
+                        field('MoviesLibraryPath').value = config.MoviesLibraryPath || '';
+                        field('SeriesLibraryPath').value = config.SeriesLibraryPath || '';
+                        field('RequireExplicitConfirmation').checked = config.RequireExplicitConfirmation !== false;
+                    });
+                }
+
+                function resetSearchDialog() {
+                    field('MediaImportSearchResults').replaceChildren();
+                    field('MediaImportEpisodePanel').hidden = true;
+                    selectedSeries = null;
+                    setMessage(field('MediaImportSearchStatus'), '', false);
+                }
+
+                function setSearchMode(mode, runSearch) {
+                    searchMode = mode;
+                    field('MediaImportSearchAll').setAttribute('aria-pressed', String(mode === 'all'));
+                    field('MediaImportSearchMovies').setAttribute('aria-pressed', String(mode === 'movies'));
+                    field('MediaImportSearchSeries').setAttribute('aria-pressed', String(mode === 'series'));
+                    resetSearchDialog();
+                    if (runSearch && field('MediaImportSearchQuery').value.trim()) {
+                        searchMetadata();
+                    }
+                }
+
+                function openSearch(row) {
+                    activeRow = row;
+                    resetSearchDialog();
+                    field('MediaImportDialogTitle').textContent = 'TMDb-Eintrag wählen';
+                    field('MediaImportDialogFile').textContent = row.fileName;
+                    var suggestedTitle = property(row.parsed, 'suggestedTitle', 'SuggestedTitle');
+                    var isGeneric = property(row.parsed, 'isGeneric', 'IsGeneric');
+                    field('MediaImportSearchQuery').value = isGeneric ? '' : (suggestedTitle || '');
+                    field('MediaImportSeason').value = property(row.parsed, 'seasonNumber', 'SeasonNumber') ?? '';
+                    field('MediaImportEpisode').value = property(row.parsed, 'episodeNumber', 'EpisodeNumber') ?? '';
+                    setSearchMode(row.mediaType === 0 ? 'movies' : (row.mediaType === 1 ? 'series' : row.suggestedSearchMode), false);
+                    field('MediaImportSearchDialog').showModal();
+                    field('MediaImportSearchQuery').focus();
+                    if (field('MediaImportSearchQuery').value) {
+                        searchMetadata();
+                    }
+                }
+
+                function renderSearchGroup(title, results, mediaType) {
+                    if (!results.length) {
+                        return;
+                    }
+
+                    var heading = document.createElement('h3');
+                    heading.className = 'mi-result-heading';
+                    heading.textContent = title;
+                    field('MediaImportSearchResults').appendChild(heading);
+                    results.forEach(function (result) {
+                        var button = document.createElement('button');
+                        button.type = 'button';
+                        button.className = 'raised emby-button mi-result';
+                        var name = property(result, 'name', 'Name');
+                        var productionYear = property(result, 'productionYear', 'ProductionYear');
+                        var tmdbId = property(result, 'tmdbId', 'TmdbId');
+                        button.textContent = name + (productionYear ? ' (' + productionYear + ')' : '') + ' · TMDb ' + tmdbId;
+                        button.addEventListener('click', function () {
+                            if (mediaType === 0) {
+                                applyMovie(result);
+                            } else {
+                                chooseSeries(result);
+                            }
+                        });
+                        field('MediaImportSearchResults').appendChild(button);
+                    });
+                }
+
+                function searchMetadata() {
+                    if (!activeRow) {
+                        return;
+                    }
+
+                    var query = field('MediaImportSearchQuery').value.trim();
+                    if (!query) {
+                        setMessage(field('MediaImportSearchStatus'), 'Bitte einen Titel eingeben.', true);
+                        return;
+                    }
+
+                    resetSearchDialog();
+                    setMessage(field('MediaImportSearchStatus'), 'TMDb wird über Jellyfin durchsucht …', false);
+                    var year = property(activeRow.parsed, 'year', 'Year');
+                    var parameters = { query: query, year: year || undefined };
+                    var movieRequest = searchMode === 'series'
+                        ? Promise.resolve(null)
+                        : apiRequest('GET', 'MediaImport/Search/Movies', undefined, parameters);
+                    var seriesRequest = searchMode === 'movies'
+                        ? Promise.resolve(null)
+                        : apiRequest('GET', 'MediaImport/Search/Series', undefined, parameters);
+
+                    Promise.all([movieRequest, seriesRequest]).then(function (responses) {
+                        var movieResponse = responses[0];
+                        var seriesResponse = responses[1];
+                        var movieResults = movieResponse ? (property(movieResponse, 'results', 'Results') || []) : [];
+                        var seriesResults = seriesResponse ? (property(seriesResponse, 'results', 'Results') || []) : [];
+                        var resultCount = movieResults.length + seriesResults.length;
+                        var message = movieResponse && property(movieResponse, 'message', 'Message')
+                            || seriesResponse && property(seriesResponse, 'message', 'Message');
+                        field('MediaImportSearchResults').replaceChildren();
+                        setMessage(field('MediaImportSearchStatus'), resultCount ? resultCount + ' Treffer' : (message || 'Keine Treffer erhalten.'), resultCount === 0);
+                        renderSearchGroup('Filme', movieResults, 0);
+                        renderSearchGroup('Serien', seriesResults, 1);
+                    }).catch(function (error) {
+                        setMessage(field('MediaImportSearchStatus'), errorMessage(error), true);
+                    });
+                }
+
+                function previewRequest(row, mediaType, metadata, season, episode) {
+                    return {
+                        sourceFileName: row.fileName,
+                        mediaType: mediaType,
+                        tmdbId: property(metadata, 'tmdbId', 'TmdbId'),
+                        seasonNumber: season === undefined ? null : season,
+                        episodeNumber: episode === undefined ? null : episode
+                    };
+                }
+
+                function applyMovie(result) {
+                    var row = activeRow;
+                    setMessage(field('MediaImportSearchStatus'), 'Zielpfad wird geprüft …', false);
+                    apiRequest('POST', 'MediaImport/Preview', previewRequest(row, 0, result)).then(function (plan) {
+                        var name = property(result, 'name', 'Name');
+                        var year = property(result, 'productionYear', 'ProductionYear');
+                        row.mediaType = 0;
+                        row.assignment = { metadata: result, label: 'Film · ' + name + (year ? ' (' + year + ')' : '') };
+                        row.plan = plan;
+                        row.error = property(plan, 'conflictMessage', 'ConflictMessage');
+                        field('MediaImportSearchDialog').close();
+                        renderRows();
+                    }).catch(function (error) {
+                        setMessage(field('MediaImportSearchStatus'), errorMessage(error), true);
+                    });
+                }
+
+                function chooseSeries(result) {
+                    selectedSeries = result;
+                    field('MediaImportEpisodePanel').hidden = false;
+                    field('MediaImportSelectedSeries').textContent = property(result, 'name', 'Name')
+                        + (property(result, 'productionYear', 'ProductionYear') ? ' (' + property(result, 'productionYear', 'ProductionYear') + ')' : '')
+                        + ' · TMDb ' + property(result, 'tmdbId', 'TmdbId');
+                    field('MediaImportEpisodePanel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+
+                function resolveEpisode() {
+                    if (!activeRow || !selectedSeries) {
+                        setMessage(field('MediaImportSearchStatus'), 'Bitte zuerst eine Serie auswählen.', true);
+                        return;
+                    }
+
+                    var season = Number(field('MediaImportSeason').value);
+                    var episode = Number(field('MediaImportEpisode').value);
+                    if (!Number.isInteger(season) || season < 0 || !Number.isInteger(episode) || episode < 1) {
+                        setMessage(field('MediaImportSearchStatus'), 'Bitte gültige Staffel- und Episodennummern eingeben.', true);
+                        return;
+                    }
+
+                    var row = activeRow;
+                    setMessage(field('MediaImportSearchStatus'), 'Episode wird über Jellyfin geprüft …', false);
+                    apiRequest('GET', 'MediaImport/Search/Episode', undefined, {
+                        seriesTmdbId: property(selectedSeries, 'tmdbId', 'TmdbId'),
+                        seasonNumber: season,
+                        episodeNumber: episode
+                    }).then(function (response) {
+                        var results = property(response, 'results', 'Results') || [];
+                        if (!results.length) {
+                            throw new Error(property(response, 'message', 'Message') || 'Die Episode konnte nicht aufgelöst werden.');
+                        }
+
+                        var episodeResult = results[0];
+                        return apiRequest('POST', 'MediaImport/Preview', previewRequest(row, 1, selectedSeries, season, episode)).then(function (plan) {
+                            var seriesName = property(selectedSeries, 'name', 'Name');
+                            var episodeName = property(episodeResult, 'name', 'Name');
+                            row.mediaType = 1;
+                            row.assignment = {
+                                metadata: selectedSeries,
+                                seasonNumber: season,
+                                episodeNumber: episode,
+                                label: 'Serie · ' + seriesName + ' · S' + String(season).padStart(2, '0') + 'E' + String(episode).padStart(2, '0') + ' · ' + episodeName
+                            };
+                            row.plan = plan;
+                            row.error = property(plan, 'conflictMessage', 'ConflictMessage');
+                            field('MediaImportSearchDialog').close();
+                            renderRows();
+                        });
+                    }).catch(function (error) {
+                        setMessage(field('MediaImportSearchStatus'), errorMessage(error), true);
+                    });
+                }
+
+                function importRequest(row) {
+                    return previewRequest(
+                        row,
+                        row.mediaType,
+                        row.assignment.metadata,
+                        row.assignment.seasonNumber,
+                        row.assignment.episodeNumber);
+                }
+
+                function importSelected() {
+                    var selected = rows.filter(function (row) { return row.selected; });
+                    if (!selected.length || selected.some(function (row) { return !row.plan || !property(row.plan, 'canImport', 'CanImport'); })) {
+                        return;
+                    }
+
+                    if ((!currentConfig || currentConfig.RequireExplicitConfirmation !== false)
+                        && !window.confirm(pluralFiles(selected.length) + ' jetzt umbenennen und verschieben? Bestehende Dateien werden niemals überschrieben.')) {
+                        return;
+                    }
+
+                    field('MediaImportSelected').disabled = true;
+                    Dashboard.showLoadingMsg();
+                    var imported = 0;
+                    var scanWarnings = 0;
+                    var failures = [];
+                    var chain = Promise.resolve();
+                    selected.forEach(function (row) {
+                        chain = chain.then(function () {
+                            return apiRequest('POST', 'MediaImport/Import', importRequest(row)).then(function (result) {
+                                imported += 1;
+                                if (!property(result, 'libraryScanQueued', 'LibraryScanQueued')) {
+                                    scanWarnings += 1;
+                                }
+                            }).catch(function (error) {
+                                failures.push(row.fileName + ': ' + errorMessage(error));
+                            });
+                        });
+                    });
+
+                    chain.then(function () {
+                        return loadFiles();
+                    }).then(function () {
+                        var message = pluralFiles(imported) + ' erfolgreich importiert.';
+                        if (scanWarnings) {
+                            message += ' Für ' + scanWarnings + ' Import(e) konnte der Jellyfin-Scan nicht gestartet werden.';
+                        }
+                        if (failures.length) {
+                            message += ' Fehlgeschlagen: ' + failures.join(' | ');
+                        }
+                        setMessage(field('MediaImportNotice'), message, failures.length > 0);
+                    }).then(function () {
+                        Dashboard.hideLoadingMsg();
+                        updateActions();
+                    });
+                }
+
+                page.querySelectorAll('.mi-sort').forEach(function (button) {
+                    button.addEventListener('click', function () {
+                        changeSort(button.getAttribute('data-sort-key'));
+                    });
+                });
+                field('MediaImportQueueTab').addEventListener('click', function () { showPanel('queue'); });
+                field('MediaImportSettingsTab').addEventListener('click', function () { showPanel('settings'); });
+                field('MediaImportRefresh').addEventListener('click', loadFiles);
+                field('MediaImportSelected').addEventListener('click', importSelected);
+                field('MediaImportSearchAll').addEventListener('click', function () { setSearchMode('all', true); });
+                field('MediaImportSearchMovies').addEventListener('click', function () { setSearchMode('movies', true); });
+                field('MediaImportSearchSeries').addEventListener('click', function () { setSearchMode('series', true); });
+                field('MediaImportSearchButton').addEventListener('click', searchMetadata);
+                field('MediaImportSearchQuery').addEventListener('keydown', function (event) {
+                    if (event.key === 'Enter') {
+                        event.preventDefault();
+                        searchMetadata();
+                    }
+                });
+                field('MediaImportResolveEpisode').addEventListener('click', resolveEpisode);
+                field('MediaImportCloseDialog').addEventListener('click', function () { field('MediaImportSearchDialog').close(); });
+                field('MediaImportSelectAll').addEventListener('change', function () {
+                    var checked = field('MediaImportSelectAll').checked;
+                    rows.forEach(function (row) { row.selected = checked; });
+                    renderRows();
+                });
+
+                page.addEventListener('pageshow', function () {
+                    showPanel('queue');
+                    Dashboard.showLoadingMsg();
+                    loadConfiguration().then(loadFiles).catch(function (error) {
+                        Dashboard.hideLoadingMsg();
+                        setMessage(field('MediaImportNotice'), errorMessage(error), true);
+                    });
+                });
+
+                field('MediaImportConfigForm').addEventListener('submit', function (event) {
+                    event.preventDefault();
+                    Dashboard.showLoadingMsg();
+                    var proposedPaths = {
+                        inboxPath: field('InboxPath').value,
+                        moviesLibraryPath: field('MoviesLibraryPath').value,
+                        seriesLibraryPath: field('SeriesLibraryPath').value
+                    };
+                    apiRequest('POST', 'MediaImport/Configuration/Validate', proposedPaths).then(function (validation) {
+                        if (!property(validation, 'isValid', 'IsValid')) {
+                            throw new Error(property(validation, 'message', 'Message') || 'Die konfigurierten Ordner dürfen sich nicht überschneiden.');
+                        }
+
+                        return ApiClient.getPluginConfiguration(pluginUniqueId);
+                    }).then(function (config) {
+                        config.InboxPath = field('InboxPath').value;
+                        config.MoviesLibraryPath = field('MoviesLibraryPath').value;
+                        config.SeriesLibraryPath = field('SeriesLibraryPath').value;
+                        config.RequireExplicitConfirmation = field('RequireExplicitConfirmation').checked;
+                        return ApiClient.updatePluginConfiguration(pluginUniqueId, config);
+                    }).then(function (result) {
+                        Dashboard.processPluginConfigurationUpdateResult(result);
+                        return loadConfiguration();
+                    }).catch(function (error) {
+                        Dashboard.hideLoadingMsg();
+                        setMessage(field('MediaImportNotice'), errorMessage(error), true);
+                    });
+                    return false;
+                });
+            }());
+        </script>
+    </div>
+</body>
+</html>

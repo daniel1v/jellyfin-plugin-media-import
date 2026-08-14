@@ -1,6 +1,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 #
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jellyfin.Plugin.Template", "Jellyfin.Plugin.Template\Jellyfin.Plugin.Template.csproj", "{D921B930-CF91-406F-ACBC-08914DCD0D34}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jellyfin.Plugin.MediaImport", "Jellyfin.Plugin.MediaImport\Jellyfin.Plugin.MediaImport.csproj", "{D921B930-CF91-406F-ACBC-08914DCD0D34}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jellyfin.Plugin.MediaImport.Tests", "Jellyfin.Plugin.MediaImport.Tests\Jellyfin.Plugin.MediaImport.Tests.csproj", "{C83A6A02-AED9-4DC2-83E9-270CDB210DAF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -24,5 +26,9 @@ Global
 		{D921B930-CF91-406F-ACBC-08914DCD0D34}.Release|x64.Build.0 = Release|Any CPU
 		{D921B930-CF91-406F-ACBC-08914DCD0D34}.Release|x86.ActiveCfg = Release|Any CPU
 		{D921B930-CF91-406F-ACBC-08914DCD0D34}.Release|x86.Build.0 = Release|Any CPU
+		{C83A6A02-AED9-4DC2-83E9-270CDB210DAF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C83A6A02-AED9-4DC2-83E9-270CDB210DAF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C83A6A02-AED9-4DC2-83E9-270CDB210DAF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C83A6A02-AED9-4DC2-83E9-270CDB210DAF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
